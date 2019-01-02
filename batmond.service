@@ -1,0 +1,8 @@
+[Unit]
+Description=Monitores the battery level and saves somewhere for future analysis
+
+[Service]
+Type=exec
+WorkingDirectory=/var/log
+ExecStart=/usr/bin/batmond
+Restart=on-failure

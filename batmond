@@ -2,7 +2,7 @@
 
 from time import time, sleep
 from argparse import ArgumentParser
-from sys import argv
+from sys import argv, stderr
 
 parser = ArgumentParser(prog="batmond", description="Monitores battery level and saves somewhere for analysis")
 parser.add_argument('-f', dest='destination', default="batmon.log", help="Where to store the logs")
@@ -22,16 +22,20 @@ def read_status() -> str:
 def read_time() -> int:
     return int(time())
 
-print("Initializing...")
-
 args = parser.parse_args(args=argv[1:])
 if __name__=="__main__":
-    with open(args.destination, 'a') as f:
+    try:
+        stderr.write("Initializing...\n")
+        stderr.flush()
         while(1):
             percent = read_percentage()
             status = read_status()
             cur_time = read_time()
-            line = "%i,%s,%i" %(percent, status, cur_time)
-            f.write(line + '\n')
-            if args.print: print(line)
+            line = "%i,%s,%i\n" %(percent, status, cur_time)
+            with open(args.destination, 'a') as f:
+                f.write(line)
+            if args.print: stderr.write(line)
             sleep(args.delay)
+    except Exception as e:
+        stderr.write(e)
+        exit(1)

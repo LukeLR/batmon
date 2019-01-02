@@ -1,0 +1,37 @@
+#! /usr/bin/env python
+
+from time import time, sleep
+from argparse import ArgumentParser
+from sys import argv
+
+parser = ArgumentParser(prog="batmond", description="Monitores battery level and saves somewhere for analysis")
+parser.add_argument('-f', dest='destination', default="batmon.log", help="Where to store the logs")
+parser.add_argument('-t', dest='delay',       default=10, type=int, help="Read values and write to file every x seconds")
+parser.add_argument('-p', dest='print',       action='store_true',  help="Print readings")
+
+def get_power_supply_parameter(what: str):
+    with open('/sys/class/power_supply/BAT1/%s' %what) as f:
+        return f.read()
+
+def read_percentage() -> int:
+    return int(get_power_supply_parameter('capacity'))
+
+def read_status() -> str:
+    return get_power_supply_parameter('status')[:-1] # Remove the newline in the end of the file
+
+def read_time() -> int:
+    return int(time())
+
+print("Initializing...")
+
+args = parser.parse_args(args=argv[1:])
+if __name__=="__main__":
+    with open(args.destination, 'a') as f:
+        while(1):
+            percent = read_percentage()
+            status = read_status()
+            cur_time = read_time()
+            line = "%i,%s,%i" %(percent, status, cur_time)
+            f.write(line + '\n')
+            if args.print: print(line)
+            sleep(args.delay)

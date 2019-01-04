@@ -4,38 +4,63 @@ from time import time, sleep
 from argparse import ArgumentParser
 from sys import argv, stderr
 
-parser = ArgumentParser(prog="batmond", description="Monitores battery level and saves somewhere for analysis")
-parser.add_argument('-f', dest='destination', default="batmon.log", help="Where to store the logs")
-parser.add_argument('-t', dest='delay',       default=10, type=int, help="Read values and write to file every x seconds")
-parser.add_argument('-p', dest='print',       action='store_true',  help="Print readings")
+class Batmon():
+    def __init__(self, destinationfd, is_print):
+        self.args = args
+        self.destination = destinationfd
+        self.is_print = is_print
+        self.percentage = Batmon.read_percentage()
+        self.status = Batmon.read_status()
+        self.time = Batmon.read_time()
+        self._handle_line()
+    def _read_all(self):
+        return Batmon.read_percentage(), Batmon.read_status(), Batmon.read_time()
+    def _update_states(self) -> bool:
+        v = self._read_all()
+        if v[:-1] != (self.percentage, self.status):
+            self.percentage, self.status, self.time = v
+            return True
+        return False
+    def _make_line(self) -> str:
+        return ",".join(map(str, [self.percentage, self.status, self.time])) + "\n"
+    def _handle_line(self):
+        line = self._make_line()
+        if self.is_print:
+            stderr.write(line)
+        self.destination.write(line)
+    def next(self) -> bool:
+        if self._update_states():
+            self._handle_line()
+            return self.percentage, self.status, self.time
+        return None
+    @staticmethod
+    def _get_power_supply_parameter(what: str):
+        #print("READ: %s" %what)
+        with open('/sys/class/power_supply/BAT1/%s' %what) as f:
+            return f.read()
+    @staticmethod
+    def read_percentage() -> int:
+        return int(Batmon._get_power_supply_parameter('capacity'))
+    @staticmethod
+    def read_status() -> str:
+        return Batmon._get_power_supply_parameter('status')[:-1] # Remove the newline in the end of the file
+    @staticmethod
+    def read_time() -> int:
+        return int(time())
 
-def get_power_supply_parameter(what: str):
-    with open('/sys/class/power_supply/BAT1/%s' %what) as f:
-        return f.read()
-
-def read_percentage() -> int:
-    return int(get_power_supply_parameter('capacity'))
-
-def read_status() -> str:
-    return get_power_supply_parameter('status')[:-1] # Remove the newline in the end of the file
-
-def read_time() -> int:
-    return int(time())
-
-args = parser.parse_args(args=argv[1:])
 if __name__=="__main__":
+    parser = ArgumentParser(prog="batmond", description="Monitores battery level and saves somewhere for analysis")
+    parser.add_argument('-f', dest='destination', default="batmon.log", help="Where to store the logs")
+    parser.add_argument('-t', dest='delay',       default=5, type=int, help="Read values and write to file every x seconds")
+    parser.add_argument('-p', dest='print',       action='store_true',  help="Print readings")
+    args = parser.parse_args(args=argv[1:])
     try:
         stderr.write("Initializing...\n")
         stderr.flush()
+        app = Batmon(open(args.destination, 'a'), args.print)
         while(1):
-            percent = read_percentage()
-            status = read_status()
-            cur_time = read_time()
-            line = "%i,%s,%i\n" %(percent, status, cur_time)
-            with open(args.destination, 'a') as f:
-                f.write(line)
-            if args.print: stderr.write(line)
-            sleep(args.delay)
+            if not app.next():
+                sleep(args.delay)
     except Exception as e:
-        stderr.write(e)
+        stderr.write(str(e))
         exit(1)

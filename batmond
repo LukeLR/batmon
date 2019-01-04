@@ -27,7 +27,9 @@ class Batmon():
         line = self._make_line()
         if self.is_print:
             stderr.write(line)
+            stderr.flush()
         self.destination.write(line)
+        self.destination.flush()
     def next(self) -> bool:
         if self._update_states():
             self._handle_line()

@@ -6,3 +6,6 @@ Type=exec
 WorkingDirectory=/var/log
 ExecStart=/usr/bin/batmond
 Restart=on-failure
+
+[Install]
+WantedBy=basic.target

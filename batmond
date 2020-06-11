@@ -40,11 +40,11 @@ class Batmon():
         #print("READ: %s" %what)
         with open(self.source + what) as f:
             return f.read()
-    def read_percentage() -> int:
+    def read_percentage(self) -> int:
         return int(_get_power_supply_parameter('capacity'))
-    def read_status() -> str:
+    def read_status(self) -> str:
         return _get_power_supply_parameter('status')[:-1] # Remove the newline in the end of the file
-    def read_time() -> int:
+    def read_time(self) -> int:
         return int(time())
 
 if __name__=="__main__":

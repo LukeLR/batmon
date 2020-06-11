@@ -36,7 +36,7 @@ class Batmon():
             self._handle_line()
             return self.percentage, self.status, self.time
         return None
-    def _get_power_supply_parameter(what: str):
+    def _get_power_supply_parameter(self, what: str):
         #print("READ: %s" %what)
         with open(self.source + what) as f:
             return f.read()

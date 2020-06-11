@@ -15,7 +15,7 @@ class Batmon():
         self.time = read_time()
         self._handle_line()
     def _read_all(self):
-        return Batmon.read_percentage(), Batmon.read_status(), Batmon.read_time()
+        return read_percentage(), read_status(), read_time()
     def _update_states(self) -> bool:
         v = self._read_all()
         if v[:-1] != (self.percentage, self.status):

@@ -54,13 +54,10 @@ if __name__=="__main__":
     parser.add_argument('-p', dest='print',       action='store_true',  help="Print readings")
     parser.add_argument('-s', dest='source',      default='/sys/class/power_supply/BAT1/', help='Where to read the battery values from')
     args = parser.parse_args(args=argv[1:])
-    try:
-        stderr.write("Initializing...\n")
-        stderr.flush()
-        app = Batmon(args.source, open(args.destination, 'a'), args.print)
-        while(1):
-            if not app.next():
-                sleep(args.delay)
-    except Exception as e:
-        stderr.write(str(e))
-        exit(1)
+    
+    stderr.write("Initializing...\n")
+    stderr.flush()
+    app = Batmon(args.source, open(args.destination, 'a'), args.print)
+    while(1):
+        if not app.next():
+            sleep(args.delay)

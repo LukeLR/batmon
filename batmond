@@ -10,9 +10,9 @@ class Batmon():
         self.source = source
         self.destination = destinationfd
         self.is_print = is_print
-        self.percentage = Batmon.read_percentage()
-        self.status = Batmon.read_status()
-        self.time = Batmon.read_time()
+        self.percentage = read_percentage()
+        self.status = read_status()
+        self.time = read_time()
         self._handle_line()
     def _read_all(self):
         return Batmon.read_percentage(), Batmon.read_status(), Batmon.read_time()

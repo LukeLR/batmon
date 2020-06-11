@@ -36,18 +36,14 @@ class Batmon():
             self._handle_line()
             return self.percentage, self.status, self.time
         return None
-    @staticmethod
     def _get_power_supply_parameter(what: str):
         #print("READ: %s" %what)
         with open(self.source + what) as f:
             return f.read()
-    @staticmethod
     def read_percentage() -> int:
         return int(Batmon._get_power_supply_parameter('capacity'))
-    @staticmethod
     def read_status() -> str:
         return Batmon._get_power_supply_parameter('status')[:-1] # Remove the newline in the end of the file
-    @staticmethod
     def read_time() -> int:
         return int(time())
 

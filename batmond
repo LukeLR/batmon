@@ -5,8 +5,9 @@ from argparse import ArgumentParser
 from sys import argv, stderr
 
 class Batmon():
-    def __init__(self, destinationfd, is_print):
+    def __init__(self, source, destinationfd, is_print):
         self.args = args
+        self.source = source
         self.destination = destinationfd
         self.is_print = is_print
         self.percentage = Batmon.read_percentage()
@@ -38,7 +39,7 @@ class Batmon():
     @staticmethod
     def _get_power_supply_parameter(what: str):
         #print("READ: %s" %what)
-        with open('/sys/class/power_supply/BAT1/%s' %what) as f:
+        with open(self.source + what) as f:
             return f.read()
     @staticmethod
     def read_percentage() -> int:
@@ -55,11 +56,12 @@ if __name__=="__main__":
     parser.add_argument('-f', dest='destination', default="batmon.log", help="Where to store the logs")
     parser.add_argument('-t', dest='delay',       default=5, type=int, help="Read values and write to file every x seconds")
     parser.add_argument('-p', dest='print',       action='store_true',  help="Print readings")
+    parser.add_argument('-s', dest='source',      default='/sys/class/power_supply/BAT1/', help='Where to read the battery values from')
     args = parser.parse_args(args=argv[1:])
     try:
         stderr.write("Initializing...\n")
         stderr.flush()
-        app = Batmon(open(args.destination, 'a'), args.print)
+        app = Batmon(args.source, open(args.destination, 'a'), args.print)
         while(1):
             if not app.next():
                 sleep(args.delay)

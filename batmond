@@ -10,12 +10,12 @@ class Batmon():
         self.source = source
         self.destination = destinationfd
         self.is_print = is_print
-        self.percentage = read_percentage()
-        self.status = read_status()
-        self.time = read_time()
+        self.percentage = self.read_percentage()
+        self.status = self.read_status()
+        self.time = self.read_time()
         self._handle_line()
     def _read_all(self):
-        return read_percentage(), read_status(), read_time()
+        return self.read_percentage(), self.read_status(), self.read_time()
     def _update_states(self) -> bool:
         v = self._read_all()
         if v[:-1] != (self.percentage, self.status):
@@ -41,9 +41,9 @@ class Batmon():
         with open(self.source + what) as f:
             return f.read()
     def read_percentage(self) -> int:
-        return int(_get_power_supply_parameter('capacity'))
+        return int(self._get_power_supply_parameter('capacity'))
     def read_status(self) -> str:
-        return _get_power_supply_parameter('status')[:-1] # Remove the newline in the end of the file
+        return self._get_power_supply_parameter('status')[:-1] # Remove the newline in the end of the file
     def read_time(self) -> int:
         return int(time())
 
